@@ -316,8 +316,9 @@ namespace ExercArvore
 
         private void button5_Click(object sender, EventArgs e)
         {
-            List<Node> list = bt.InLevel();
-            ShowList(list);
+            //List<Node> list = bt.InLevel();
+            //ShowList(list);
+            
         }
 
         private void lblFind_Click(object sender, EventArgs e)

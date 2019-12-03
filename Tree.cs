@@ -33,6 +33,12 @@ namespace ExercArvore
             get { return info; }
             set { info = value; }
         }
+
+        public int Level
+        {
+            get { return level; }
+            set { level = value; }
+        }
         public Node Left
         {
             get { return left; }
@@ -105,6 +111,8 @@ namespace ExercArvore
                 }
 
             }
+            //isso aqui eu inseri depois
+            n = balance_tree(n);
         }
 
 
@@ -258,6 +266,87 @@ namespace ExercArvore
         {
             return null;
         }
+
+        private Node balance_tree(Node n)
+        {
+            int b_factor = balance_factor(n);
+            if (b_factor > 1)
+            {
+                if (balance_factor(n.Left) > 0)
+                {
+                    n = RotateLL(n);
+                }
+                else
+                {
+                    n = RotateLR(n);
+                }
+            }
+            else if (b_factor < -1)
+            {
+                if (balance_factor(n.Right) > 0)
+                {
+                    n = RotateRL(n);
+                }
+                else
+                {
+                    n = RotateRR(n);
+                }
+            }
+            return n;
+        }
+
+        private Node RotateRR(Node parent)
+        {
+            Node pivot = parent.Right;
+            parent.Right = pivot.Left;
+            pivot.Left = parent;
+            return pivot;
+        }
+        private Node RotateLL(Node parent)
+        {
+            Node pivot = parent.Left;
+            parent.Left = pivot.Right;
+            pivot.Right = parent;
+            return pivot;
+        }
+        private Node RotateLR(Node parent)
+        {
+            Node pivot = parent.Left;
+            parent.Left = RotateRR(pivot);
+            return RotateLL(parent);
+        }
+        private Node RotateRL(Node parent)
+        {
+            Node pivot = parent.Right;
+            parent.Right = RotateLL(pivot);
+            return RotateRR(parent);
+        }
+
+        private int balance_factor(Node current)
+        {
+            int l = getHeight(current.Left);
+            int r = getHeight(current.Right);
+            int b_factor = l - r;
+            return b_factor;
+        }
+
+        private int max(int l, int r)
+        {
+            return l > r ? l : r;
+        }
+        private int getHeight(Node current)
+        {
+            int height = 0;
+            if (current != null)
+            {
+                int l = getHeight(current.Left);
+                int r = getHeight(current.Right);
+                int m = max(l, r);
+                height = m + 1;
+            }
+            return height;
+        }
+
 
     }
 }
