@@ -1,15 +1,14 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ExercArvore
 {
-    // Classe com o nó
     public class Node
     {
         private int info, level;
         private Node left, right, father;
 
-        // Construtor
         public Node(int x, Node p)
         {
             info = x;
@@ -17,17 +16,8 @@ namespace ExercArvore
             left = null;
             right = null;
 
-            if (father != null)
-            {
-                level = father.level + 1;
-            }
-            else
-            {
-                level = 0;
-            }
         }
 
-        // Properties
         public int Info
         {
             get { return info; }
@@ -56,10 +46,8 @@ namespace ExercArvore
         }
     }
 
-    // Classe com a árvore
     public class BTree
     {
-        // Nó raiz
         private Node root;
         public Node Root
         {
@@ -67,273 +55,78 @@ namespace ExercArvore
             set { root = value; }
         }
 
-        // Construtor
         public BTree()
         {
             root = null;
         }
 
-        // Inserindo na árvore
         public void Insert(int x)
         {
+            Node novo = new Node(x, null);
             if (root == null)
             {
-                root = new Node(x, null);
+                root = novo;
             }
             else
             {
-                Insert(root, x);
+                root = Insert(root, novo);
             }
         }
 
-        private void Insert(Node n, int x)
+        private Node Insert(Node current, Node novo)
         {
-            if (x < n.Info)
+            if (current == null)
             {
-                if (n.Left == null)
+                current = novo;
+                return current;
+            }
+            else if (novo.Info < current.Info)
+            {
+                current.Left = Insert(current.Left, novo);
+                current = Balance_tree(current);
+            }
+            else if (novo.Info >= current.Info)
+            {
+                current.Right = Insert(current.Right, novo);
+                current = Balance_tree(current);
+            }
+            return current;
+        }
+
+        private Node Balance_tree(Node n)
+        {
+            int fb = FBalance(n);
+            if (fb > 1)
+            {
+                if (FBalance(n.Left) > 0)
                 {
-                    n.Left = new Node(x, n);
+                    n = RotateLeft(n);
                 }
                 else
                 {
-                    Insert(n.Left, x);
+                    n = RotateLeftRight(n);
                 }
             }
-            else
+            else if (fb < -1)
             {
-                if (n.Right == null)
+                if (FBalance(n.Right) > 0)
                 {
-                    n.Right = new Node(x, n);
+                    n = RotateRightLeft(n);
                 }
                 else
                 {
-                    Insert(n.Right, x);
-                }
-
-            }
-            //isso aqui eu inseri depois
-            n = balance_tree(n);
-        }
-
-
-        // Pesquisa na árvore
-        public Node Find(int x)
-        {
-            return Find(root, x);
-        }
-
-        private Node Find(Node n, int x)
-        {
-            if ((n == null) || (n.Info == x))
-            {
-                return n;
-            }
-
-            if (x < n.Info)
-            {
-                return Find(n.Left, x);
-            }
-            else
-            {
-                return Find(n.Right, x);
-            }
-        }
-
-        // Função para excluir nó
-        public void Remove(int x)
-        {
-            Remove(root, x);
-        }
-
-        public void Remove(Node n, int x)
-        {
-            Node f = Find(n, x);
-
-            if (f == null)
-            {
-                return;
-            }
-
-            if (f.Left == null)
-            {
-                if (f.Father == null)
-                {
-                    root = f.Right;
-                }
-                else
-                {
-                    if (f.Father.Right == f)
-                    {
-                        f.Father.Right = f.Right;
-                    }
-                    else
-                    {
-                        f.Father.Left = f.Right;
-                    }
-
-                    if (f.Right != null)
-                    {
-                        f.Right.Father = f.Father;
-                    }
-                }
-            }
-            else
-            {
-                if (f.Right == null)
-                {
-                    if (f.Father == null)
-                    {
-                        root = f.Left;
-                    }
-                    else
-                    {
-                        if (f.Father.Right == f)
-                        {
-                            f.Father.Right = f.Left;
-                        }
-                        else
-                        {
-                            f.Father.Left = f.Left;
-                        }
-
-                        if (f.Left != null)
-                        {
-                            f.Left.Father = f.Father;
-                        }
-                    }
-                }
-                else
-                {
-                    Node p = KillMin(f.Right);
-                    f.Info = p.Info;
-                }
-            }
-            if (root != null)
-            {
-                root.Father = null;
-            }
-
-        }
-
-        private Node KillMin(Node n)
-        {
-            if (n.Left == null)
-            {
-                Node t = n;
-
-                if (n.Father.Right == n)
-                {
-                    n.Father.Right = n.Right;
-                }
-                else
-                {
-                    n.Father.Left = n.Right;
-                }
-
-                if (n.Right != null)
-                {
-                    n.Right.Father = n.Father;
-                }
-
-                return t;
-
-            }
-            else
-            {
-                return KillMin(n.Left);
-            }
-
-        }
-
-
-
-        public List<Node> InOrder()
-        {
-            return null;
-        }
-
-        public List<Node> PreOrder()
-        {
-            return null;
-        }
-
-        public List<Node> PosOrder()
-        {
-            return null;
-        }
-
-        public List<Node> InLevel()
-        {
-            return null;
-        }
-
-        private Node balance_tree(Node n)
-        {
-            int b_factor = balance_factor(n);
-            if (b_factor > 1)
-            {
-                if (balance_factor(n.Left) > 0)
-                {
-                    n = RotateLL(n);
-                }
-                else
-                {
-                    n = RotateLR(n);
-                }
-            }
-            else if (b_factor < -1)
-            {
-                if (balance_factor(n.Right) > 0)
-                {
-                    n = RotateRL(n);
-                }
-                else
-                {
-                    n = RotateRR(n);
+                    n = RotateRight(n);
                 }
             }
             return n;
-        }
-
-        private Node RotateRR(Node parent)
-        {
-            Node pivot = parent.Right;
-            parent.Right = pivot.Left;
-            pivot.Left = parent;
-            return pivot;
-        }
-        private Node RotateLL(Node parent)
-        {
-            Node pivot = parent.Left;
-            parent.Left = pivot.Right;
-            pivot.Right = parent;
-            return pivot;
-        }
-        private Node RotateLR(Node parent)
-        {
-            Node pivot = parent.Left;
-            parent.Left = RotateRR(pivot);
-            return RotateLL(parent);
-        }
-        private Node RotateRL(Node parent)
-        {
-            Node pivot = parent.Right;
-            parent.Right = RotateLL(pivot);
-            return RotateRR(parent);
-        }
-
-        private int balance_factor(Node current)
-        {
-            int l = getHeight(current.Left);
-            int r = getHeight(current.Right);
-            int b_factor = l - r;
-            return b_factor;
         }
 
         private int max(int l, int r)
         {
             return l > r ? l : r;
         }
+
+
         private int getHeight(Node current)
         {
             int height = 0;
@@ -347,6 +140,232 @@ namespace ExercArvore
             return height;
         }
 
+        private int FBalance(Node current)
+        {
+            int l = getHeight(current.Left);
+            int r = getHeight(current.Right);
+            int b_factor = l - r;
+            return b_factor;
+        }
 
+        private Node RotateRight(Node father)
+        {
+            Node aux = father.Right;
+            father.Right = aux.Left;
+            aux.Left = father;
+            return aux;
+        }
+
+        //Rotação para Esquerda
+        private Node RotateLeft(Node father)
+        {
+            Node aux = father.Left;
+            father.Left = aux.Right;
+            aux.Right = father;
+            return aux;
+        }
+
+        //Rotação Esquerda Direita
+        private Node RotateLeftRight(Node father)
+        {
+            Node aux = father.Left;
+            father.Left = RotateRight(aux);
+            return RotateLeft(father);
+        }
+
+        //Rotação Direita Esquerda
+        private Node RotateRightLeft(Node father)
+        {
+            Node aux = father.Right;
+            father.Right = RotateLeft(aux);
+            return RotateRight(father);
+        }
+
+        // Pesquisa na árvore
+        public Node Find(int x)
+        {
+            return Find(Root, x);
+        }
+        private Node Find(Node current, int x)
+        {
+            if (current == null || current.Info == x)
+            {
+                return current;
+            }
+            if (x < current.Info)
+            {
+                return Find(current.Left, x);
+            }
+            else
+            {
+                return Find(current.Right, x);
+            }
+        }
+
+        // Função para excluir nó
+        public void Remove(int x)
+        {
+            Root = Remove(Root, x);
+        }
+        private Node Remove(Node current, int x)
+        {
+            Node father;
+            if (current == null)
+            {
+                return null;
+            }
+            else
+            {
+                //SubArvore Esquerda
+                if (x < current.Info)
+                {
+                    current.Left = Remove(current.Left, x);
+                    if (FBalance(current) == -2)
+                    {
+                        if (FBalance(current.Right) <= 0)
+                        {
+                            current = RotateRight(current);
+                        }
+                        else
+                        {
+                            current = RotateRightLeft(current);
+                        }
+                    }
+                }
+                //SubArvore Direita
+                else if (x > current.Info)
+                {
+                    current.Right = Remove(current.Right, x);
+                    if (FBalance(current) == 2)
+                    {
+                        if (FBalance(current.Left) >= 0)
+                        {
+                            current = RotateLeft(current);
+                        }
+                        else
+                        {
+                            current = RotateLeftRight(current);
+                        }
+                    }
+                }
+                //Se o valor for encontrado
+                else
+                {
+                    if (current.Right != null)
+                    {
+                        //Exclui o proximo
+                        father = current.Right;
+                        while (father.Left != null)
+                        {
+                            father = father.Left;
+                        }
+                        current.Info = father.Info;
+                        current.Right = Remove(current.Right, father.Info);
+                        if (FBalance(current) == 2)
+                        {
+                            if (FBalance(current.Left) >= 0)
+                            {
+                                current = RotateLeft(current);
+                            }
+                            else
+                            {
+                                current = RotateLeftRight(current);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Se atual.Esq != null
+                        return current.Left;
+                    }
+                }
+            }
+            return current;
+        }
+
+        //imprimir em ordem (Esq, Raiz, Dir)
+        public List<Node> InOrder()
+        {
+            List<Node> x = new List<Node>();
+            return InOrder(Root, x);
+        }
+        private List<Node> InOrder(Node current, List<Node> x)
+        {
+            if (current != null)
+            {
+                InOrder(current.Left, x);
+                x.Add(current);
+                InOrder(current.Right, x);
+            }
+            return x;
+        }
+
+        //imprimir pré-Ordem (Raiz, Esq, Dir)
+        public List<Node> PreOrder()
+        {
+            List<Node> x = new List<Node>();
+            return PreOrder(Root, x);
+        }
+
+        private List<Node> PreOrder(Node current, List<Node> x)
+        {
+            if (current != null)
+            {
+                x.Add(current);
+                PreOrder(current.Left, x);
+                PreOrder(current.Right, x);
+            }
+
+            return x;
+        }
+
+        //imprimir PosOrder(Esq, Dir, Raiz)
+        public List<Node> PosOrder()
+        {
+            List<Node> x = new List<Node>();
+            return PosOrder(Root, x);
+        }
+
+        private List<Node> PosOrder(Node current, List<Node> x)
+        {
+            if (current != null)
+            {
+                PosOrder(current.Left, x);
+                PosOrder(current.Right, x);
+                x.Add(current);
+            }
+            return x;
+        }
+
+        // Imprimir em level
+        public List<Node> InLevel()
+        {
+            List<Node> x = new List<Node>();
+            return InLevel(Root, x);
+        }
+        private List<Node> InLevel(Node current, List<Node> x)
+        {
+            if (current != null)
+            {
+                Queue q = new Queue();
+                q.Enqueue(current);
+                while (q.Count > 0)
+                {
+                    Node aux = (Node)q.Dequeue();
+                    x.Add(aux);
+                    if (aux.Left != null)
+                    {
+                        q.Enqueue(aux.Left);
+                    }
+                    if (aux.Right != null)
+                    {
+                        q.Enqueue(aux.Right);
+                    }
+                }
+            }
+            return x;
+        }
     }
 }
+
+
